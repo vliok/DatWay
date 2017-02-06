@@ -1,29 +1,37 @@
-import sqlite3   #enable control of an sqlite database
-import csv       #facilitates CSV I/O
+from pymongo import MongoClient
+import csv
 
+f = open("peeps.csv")
+p = csv.DictReader(f)
 
-f="discobandit.db"
+f = open("courses.csv")
+c = csv.DictReader(f)
 
-db = sqlite3.connect(f) #open if f exists, otherwise create
-c = db.cursor()    #facilitate db ops
+def merge( thing1, thing2 ):
+    list1 = []
+    list2 = []
+    for dic in thing1:
+        list1.append(dic)
+    for dic in thing2:
+        list2.append(dic)
+    for dic in list1:
+        for dic2 in list2:
+            if dic2["id"] == dic["id"]:
+                index = list1.index(dic)
+                code = dic2["code"]
+                mark = dic2["mark"]
+                list1[index][code] = mark
+    return list1
 
-#==========================================================
-#INSERT YOUR POPULATE CODE IN THIS ZONE
-#...perhaps by beginning with these examples...
-
+'''                                                                                                                                 
+test =  merge( p, c )                                                                                                              
+                                                                                                                                    
+for stuff in test:                                                                                                               
+print stuff                                                                                                                      
 '''
-q = "CREATE TABLE students (name TEXT, id INTEGER)"
 
-c.execute(q)    #run SQL query
-
-
-q = "CREATE TABLE courses (code TEXT, id INTEGER, mark INTEGER)"
-
-c.execute(q)
-'''
-
-#==========================================================
-db.commit() #save changes
-db.close()  #close database
-
-
+server = MongoClient("149.89.150.100")
+db = server.DatWay
+s = db.students
+merged = merge( p, c )
+s.insert_many( merged )
