@@ -10,12 +10,15 @@ teachers_coll = db.teachers
 def get_ids(class_name):
     ret = list()
     results = students_coll.find({ class_name: {'$exists': True} })
-    for result in results:
-        del result['_id']
-        ret.append(result)
-    return ret
+    return [result['id'] for result in results]
 
 with open('teachers.csv') as f:
     reader = csv.DictReader(f)
     for row in reader:
-        teachers_coll.insert_many( get_ids(row['code']) )
+        new_doc = dict()
+        new_doc['name'] = row['teacher']
+        new_doc['class'] = row['code']
+        new_doc['period'] = row['period']
+        new_doc['students'] = get_ids(row['code'])
+
+        teachers_coll.insert_one(new_doc)
